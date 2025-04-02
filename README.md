@@ -33,12 +33,14 @@ npm start
 
 ### Exécution automatique via GitHub Actions
 
-Le script s'exécute automatiquement selon le planning suivant :
+Le script s'exécute automatiquement selon le planning suivant (heure française) :
 - Mercredi à 7h25
 - Jeudi à 8h35
 - Vendredi à 7h25
 - Samedi à 8h30
 - Dimanche à 8h30
+
+Note : Les heures sont en heure française (UTC+1 en hiver, UTC+2 en été). Le script s'adapte automatiquement au changement d'heure.
 
 Pour exécuter manuellement le script via GitHub Actions :
 1. Allez dans l'onglet "Actions" de votre dépôt GitHub
