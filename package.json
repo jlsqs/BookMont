@@ -1,0 +1,13 @@
+{
+  "name": "bookmont",
+  "version": "1.0.0",
+  "description": "Script d'automatisation pour la réservation de cours",
+  "main": "bookclass.js",
+  "scripts": {
+    "start": "node bookclass.js"
+  },
+  "dependencies": {
+    "puppeteer": "^22.8.2",
+    "dotenv": "^16.0.0"
+  }
+} 
