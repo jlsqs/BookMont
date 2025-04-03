@@ -37,4 +37,15 @@ jobs:
         echo "MONTGOLFIERE_PASSWORD=${{ secrets.MONTGOLFIERE_PASSWORD }}" >> .env
         
     - name: Run booking script
-      run: npm start 
+      run: npm start
+      
+    - name: Notify on success
+      if: success()
+      run: |
+        echo "✅ Booking script executed successfully at $(date)"
+        
+    - name: Notify on failure
+      if: failure()
+      run: |
+        echo "❌ Booking script failed at $(date)"
+        exit 1 
