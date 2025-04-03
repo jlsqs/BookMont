@@ -2,16 +2,16 @@ name: Book Montgolfiere Class
 
 on:
   schedule:
-    # Mercredi à 7h25 (FR) = 5h25 (UTC)
-    - cron: '25 5 * * 3'
-    # Jeudi à 8h35 (FR) = 6h35 (UTC)
-    - cron: '35 6 * * 4'
-    # Vendredi à 7h25 (FR) = 5h25 (UTC)
-    - cron: '25 5 * * 5'
-    # Samedi à 8h30 (FR) = 6h30 (UTC)
-    - cron: '30 6 * * 6'
-    # Dimanche à 8h30 (FR) = 6h30 (UTC)
-    - cron: '30 6 * * 0'
+    # Mercredi à 7h15 (FR) = 5h15 (UTC) - 10 minutes d'avance
+    - cron: '15 5 * * 3'
+    # Jeudi à 8h25 (FR) = 6h25 (UTC) - 10 minutes d'avance
+    - cron: '25 6 * * 4'
+    # Vendredi à 7h15 (FR) = 5h15 (UTC) - 10 minutes d'avance
+    - cron: '15 5 * * 5'
+    # Samedi à 8h20 (FR) = 6h20 (UTC) - 10 minutes d'avance
+    - cron: '20 6 * * 6'
+    # Dimanche à 8h20 (FR) = 6h20 (UTC) - 10 minutes d'avance
+    - cron: '20 6 * * 0'
   workflow_dispatch:  # Permet l'exécution manuelle
   push:  # S'exécute à chaque push pour tester
     branches: [ main ]
@@ -19,6 +19,7 @@ on:
 jobs:
   book-class:
     runs-on: ubuntu-latest
+    timeout-minutes: 15  # Timeout après 15 minutes
     
     steps:
     - uses: actions/checkout@v4
