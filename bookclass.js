@@ -10,6 +10,59 @@ function log(message) {
     console.log(`[${timestamp}] ${message}`);
 }
 
+async function waitForBookingButton(page, uniqueClassId, classTime) {
+    console.log(`Waiting for booking button for class ${uniqueClassId}...`);
+    
+    // Attendre que le bouton soit visible
+    await page.waitForSelector(
+        `button[onclick="go_subscribe(${uniqueClassId});"]`,
+        { timeout: 10000 }
+    );
+    
+    // Calculer l'heure exacte d'ouverture (5 jours avant l'heure du cours)
+    const [hours, minutes] = classTime.split('h').map(Number);
+    const targetTime = new Date();
+    targetTime.setHours(hours, minutes, 0, 0);
+    
+    // Attendre jusqu'à l'heure d'ouverture
+    const now = new Date();
+    const timeToWait = targetTime - now;
+    
+    if (timeToWait > 0) {
+        console.log(`Waiting ${Math.floor(timeToWait / 1000)} seconds until booking time...`);
+        await new Promise(resolve => setTimeout(resolve, timeToWait));
+    }
+    
+    // Attendre 4 secondes après l'heure d'ouverture pour s'assurer que le créneau est bien ouvert
+    await new Promise(resolve => setTimeout(resolve, 4000));
+    
+    // Tenter de cliquer sur le bouton
+    try {
+        await page.click(`button[onclick="go_subscribe(${uniqueClassId});"]`);
+        
+        // Attendre un court instant pour voir si une erreur apparaît
+        await page.waitForTimeout(1000);
+        
+        // Vérifier si une erreur est apparue
+        const errorMessage = await page.evaluate(() => {
+            const errorElement = document.querySelector('.alert-danger');
+            return errorElement ? errorElement.textContent : null;
+        });
+        
+        if (errorMessage) {
+            console.log(`❌ Error: ${errorMessage}`);
+            return false;
+        }
+        
+        console.log('✅ Booking successful!');
+        return true;
+        
+    } catch (error) {
+        console.log(`❌ Error clicking button: ${error.message}`);
+        return false;
+    }
+}
+
 async function main() {
     try {
         browser = await puppeteer.launch({
@@ -109,11 +162,12 @@ async function main() {
         }, uniqueClassId);
 
         // Attente et clic sur le bouton de réservation
-        await page.waitForSelector(
-            `button[onclick="go_subscribe(${uniqueClassId});"]`,
-            { timeout: 5000 }
-        );
-        await page.click(`button[onclick="go_subscribe(${uniqueClassId});"]`);
+        const buttonFound = await waitForBookingButton(page, uniqueClassId, targetClassTime);
+        if (!buttonFound) {
+            console.log('Could not book the class, exiting...');
+            await browser.close();
+            return;
+        }
         
         log('Réservation effectuée avec succès!');
         
