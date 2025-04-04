@@ -2,20 +2,16 @@ name: Book Montgolfiere Class
 
 on:
   schedule:
-    # Lundi à 7h30 (FR) = 5h05 (UTC) - 25 minutes d'avance
-    - cron: '05 5 * * 1'
-    # Mardi à 8h40 (FR) = 6h15 (UTC) - 25 minutes d'avance
-    - cron: '15 6 * * 2'
-    # Mercredi à 7h30 (FR) = 5h05 (UTC) - 25 minutes d'avance
+    # Mercredi à 5h05 (UTC) - réserve pour Lundi 7h30 (FR)
     - cron: '05 5 * * 3'
-    # Jeudi à 8h35 (FR) = 6h10 (UTC) - 25 minutes d'avance
-    - cron: '10 6 * * 4'
-    # Vendredi à 8h35 (FR) = 6h10 (UTC) - 25 minutes d'avance
-    - cron: '10 6 * * 5'
-    # Samedi à 8h30 (FR) = 6h05 (UTC) - 25 minutes d'avance
-    - cron: '05 6 * * 6'
-    # Dimanche à 8h30 (FR) = 6h05 (UTC) - 25 minutes d'avance
-    - cron: '05 6 * * 0'
+    # Jeudi à 6h15 (UTC) - réserve pour Mardi 8h40 (FR)
+    - cron: '15 6 * * 4'
+    # Vendredi à 5h05 (UTC) - réserve pour Mercredi 7h30 (FR)
+    - cron: '05 5 * * 5'
+    # Samedi à 6h10 (UTC) - réserve pour Jeudi 8h35 (FR)
+    - cron: '10 6 * * 6'
+    # Dimanche à 6h10 (UTC) - réserve pour Vendredi 8h35 (FR)
+    - cron: '10 6 * * 0'
   workflow_dispatch:  # Permet l'exécution manuelle
   push:  # S'exécute à chaque push pour tester
     branches: [ main ]
