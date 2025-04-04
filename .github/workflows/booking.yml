@@ -19,7 +19,7 @@ on:
 jobs:
   book-class:
     runs-on: ubuntu-latest
-    timeout-minutes: 15  # Timeout après 15 minutes
+    timeout-minutes: 25  # Timeout après 25 minutes pour tenir compte du démarrage plus tôt
     
     steps:
     - uses: actions/checkout@v4
