@@ -1,3 +1,37 @@
+// Configuration des cours à réserver
+const classes = [
+    {
+        day: 'mercredi',
+        time: '7h30',
+        targetDay: 'lundi',
+        targetTime: '7h30'
+    },
+    {
+        day: 'jeudi',
+        time: '8h40',
+        targetDay: 'mardi',
+        targetTime: '8h40'
+    },
+    {
+        day: 'vendredi',
+        time: '7h30',
+        targetDay: 'mercredi',
+        targetTime: '7h30'
+    },
+    {
+        day: 'samedi',
+        time: '8h30',
+        targetDay: 'jeudi',
+        targetTime: '8h30'
+    },
+    {
+        day: 'dimanche',
+        time: '8h30',
+        targetDay: 'vendredi',
+        targetTime: '8h30'
+    }
+];
+
 module.exports = {
     credentials: {
         email: process.env.MONTGOLFIERE_EMAIL || 'j.sarquis@hotmail.com',
@@ -26,5 +60,6 @@ module.exports = {
     },
     retries: {
         pageLoad: 3
-    }
+    },
+    classes
 }; 
