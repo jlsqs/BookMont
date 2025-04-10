@@ -1,13 +1,134 @@
-require('dotenv').config();
 const puppeteer = require('puppeteer');
 
-let consoleLogs = [];
-let browser = null;
+let consoleLogs = []; // Array to store console logs
 
 function log(message) {
-    const timestamp = new Date().toISOString();
-    consoleLogs.push(`[${timestamp}] ${message}`);
-    console.log(`[${timestamp}] ${message}`);
+    consoleLogs.push(message);
+    console.log(message);
+}
+
+async function loginAndClickClass() {
+    const browser = await puppeteer.launch({ headless: false });
+    const page = await browser.newPage();
+
+    async function loadPage(url, retries = 3) {
+        for (let attempt = 1; attempt <= retries; attempt++) {
+            try {
+                log(`Attempting to load ${url}, attempt ${attempt}...`);
+                await page.goto(url, { waitUntil: 'networkidle2', timeout: 15000 });
+                log(`${url} loaded successfully.`);
+                return;
+            } catch (error) {
+                log(`Error loading ${url} (attempt ${attempt}): ${error}`);
+                if (attempt === retries) {
+                    throw new Error(`Failed to load ${url} after ${retries} attempts.`);
+                }
+            }
+        }
+    }
+
+    try {
+        // Step 1: Log in
+        await loadPage('https://lamontgolfiereclub.com/dashboard/');
+
+        const email = 'j.sarquis@hotmail.com';
+        const password = 'Fenetre07mon';
+
+        await page.type('#connexion_email', email);
+        await page.type('#connexion_password', password);
+        await page.click('#btn-connexion');
+        await page.waitForSelector('#account__logout', { timeout: 15000 }); // Confirm login
+        log('Login successful!');
+
+        // Step 2: Navigate to planning page
+        await loadPage('https://lamontgolfiereclub.com/planning/');
+
+        // Step 3: Wait for classes to load
+        await page.waitForSelector('.planning__box', { timeout: 15000 });
+        await new Promise(resolve => setTimeout(resolve, 2000)); // Additional delay to ensure all content is loaded
+
+        log('Page loaded. Searching for the specific class...');
+
+        // Calculate the target date (5 days from now)
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + 5);
+        const targetWeekday = targetDate.getDay(); // 0 = Sunday, 1 = Monday, ..., 5 = Friday, 6 = Saturday
+        const targetDateString = targetDate.toLocaleDateString('fr-FR', { day: '2-digit', month: 'long' });
+
+        log(`Target date: ${targetDateString}, Target weekday: ${targetWeekday}`);
+
+        // Define class time based on the target weekday
+        const classTimes = {
+            1: "07h30", // Monday
+            2: "08h40", // Tuesday
+            3: "07h30", // Wednesday
+            4: "08h35", // Thursday
+            5: "08h35", // Friday
+        };
+        const targetClassTime = classTimes[targetWeekday] || "08h35"; // Default to 08h35 if the day is not mapped
+
+        log(`Target class time: ${targetClassTime}`);
+
+        // Find the specific class based on date, time, and name
+        const uniqueClassId = await page.evaluate((targetDateString, targetClassTime) => {
+            const classElements = document.querySelectorAll('.planning__box');
+
+            for (let el of classElements) {
+                const dateElement = el.querySelector('.planning__event-date');
+                const timeElement = el.querySelector('.planning__event-time');
+                const nameElement = el.querySelector('.planning__event-name');
+
+                if (
+                    dateElement &&
+                    timeElement &&
+                    nameElement &&
+                    dateElement.textContent.trim().endsWith(targetDateString) &&
+                    timeElement.textContent.trim().startsWith(targetClassTime) &&
+                    ["hard training", "bootcamp", "cross training"].includes(nameElement.textContent.trim().toLowerCase())
+                ) {
+                    const onclickValue = el.getAttribute('onclick');
+                    const match = onclickValue.match(/show_detail\((\d+),/);
+                    if (match) {
+                        return match[1]; // Return the unique class ID
+                    }
+                }
+            }
+            return null; // Class not found
+        }, targetDateString, targetClassTime);
+
+        if (!uniqueClassId) {
+            log('Class not found based on the specific criteria!');
+            return;
+        }
+
+        log(`Class found! Unique ID: ${uniqueClassId}`);
+
+        const classClicked = await page.evaluate((uniqueClassId) => {
+            const classElement = document.querySelector(`.planning__box[onclick*=\"show_detail(${uniqueClassId},\"]`);
+
+            if (classElement) {
+                classElement.click(); // Click the class element
+                return true; // Class clicked
+            }
+            return false; // Class not found
+        }, uniqueClassId);
+
+        if (classClicked) {
+            log(`Class with ID ${uniqueClassId} clicked.`);
+
+            // Step 4: Wait until the class reservation time to click the reserve button
+            await waitForBookingButton(page, uniqueClassId, targetClassTime);
+        } else {
+            log('Class not found!');
+        }
+    } catch (error) {
+        log(`Error: ${error}`);
+    } finally {
+        log('Script completed. Browser will remain open for 5 seconds before closing.');
+        await new Promise(resolve => setTimeout(resolve, 10000));
+        await browser.close();
+        log('Browser closed.');
+    }
 }
 
 async function waitForBookingButton(page, uniqueClassId, classTime) {
@@ -22,6 +143,7 @@ async function waitForBookingButton(page, uniqueClassId, classTime) {
     // Calculer l'heure exacte d'ouverture (5 jours avant l'heure du cours)
     const [hours, minutes] = classTime.split('h').map(Number);
     const targetTime = new Date();
+    targetTime.setDate(targetTime.getDate() + 5); // Ajouter 5 jours
     targetTime.setHours(hours, minutes, 0, 0);
     
     // Vérifier si on est déjà en retard
@@ -80,130 +202,5 @@ async function waitForBookingButton(page, uniqueClassId, classTime) {
     return false;
 }
 
-async function main() {
-    try {
-        browser = await puppeteer.launch({
-            headless: "new",
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--disable-gpu',
-                '--window-size=1920x1080'
-            ]
-        });
-        const page = await browser.newPage();
-        await page.setViewport({ width: 1920, height: 1080 });
-
-        // Login
-        log('Tentative de connexion...');
-        await page.goto('https://lamontgolfiereclub.com/dashboard/', {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
-
-        await page.type('#connexion_email', process.env.MONTGOLFIERE_EMAIL);
-        await page.type('#connexion_password', process.env.MONTGOLFIERE_PASSWORD);
-        await page.click('#btn-connexion');
-        
-        await page.waitForSelector('#account__logout', { timeout: 30000 });
-        log('Connexion réussie!');
-
-        // Navigation vers le planning
-        log('Navigation vers le planning...');
-        await page.goto('https://lamontgolfiereclub.com/planning/', {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
-
-        // Attente du chargement des cours
-        await page.waitForSelector('.planning__box', { timeout: 30000 });
-        await new Promise(resolve => setTimeout(resolve, 2000));
-
-        // Calcul de la date cible (5 jours plus tard)
-        const targetDate = new Date();
-        targetDate.setDate(targetDate.getDate() + 5);
-        const targetWeekday = targetDate.getDay();
-        const targetDateString = targetDate.toLocaleDateString('fr-FR', { 
-            day: '2-digit',
-            month: 'long'
-        });
-
-        log(`Recherche d'un cours pour le ${targetDateString}`);
-
-        // Définition de l'heure du cours selon le jour
-        const classTimes = {
-            1: "07h30", // Lundi
-            2: "08h40", // Mardi
-            3: "07h30", // Mercredi
-            4: "08h35", // Jeudi
-            5: "08h35", // Vendredi
-        };
-        const targetClassTime = classTimes[targetWeekday] || "08h35";
-
-        // Recherche du cours
-        const uniqueClassId = await page.evaluate((targetDateString, targetClassTime) => {
-            const classElements = document.querySelectorAll('.planning__box');
-            for (let el of classElements) {
-                const dateElement = el.querySelector('.planning__event-date');
-                const timeElement = el.querySelector('.planning__event-time');
-                const nameElement = el.querySelector('.planning__event-name');
-
-                if (dateElement && timeElement && nameElement &&
-                    dateElement.textContent.trim().endsWith(targetDateString) &&
-                    timeElement.textContent.trim().startsWith(targetClassTime) &&
-                    ["hard training", "bootcamp", "cross training"].includes(
-                        nameElement.textContent.trim().toLowerCase()
-                    )) {
-                    const onclickValue = el.getAttribute('onclick');
-                    const match = onclickValue.match(/show_detail\((\d+),/);
-                    return match ? match[1] : null;
-                }
-            }
-            return null;
-        }, targetDateString, targetClassTime);
-
-        if (!uniqueClassId) {
-            throw new Error('Cours non trouvé pour la date et l\'heure spécifiées');
-        }
-
-        log(`Cours trouvé! ID: ${uniqueClassId}`);
-
-        // Clic sur le cours
-        await page.evaluate((uniqueClassId) => {
-            const element = document.querySelector(
-                `.planning__box[onclick*="show_detail(${uniqueClassId},"]`
-            );
-            if (element) element.click();
-        }, uniqueClassId);
-
-        // Attente et clic sur le bouton de réservation
-        const buttonFound = await waitForBookingButton(page, uniqueClassId, targetClassTime);
-        if (!buttonFound) {
-            console.log('Could not book the class, exiting...');
-            await browser.close();
-            return;
-        }
-        
-        log('Réservation effectuée avec succès!');
-        
-        // Attente pour s'assurer que la réservation est bien enregistrée
-        await new Promise(resolve => setTimeout(resolve, 5000));
-
-    } catch (error) {
-        log(`Erreur: ${error.message}`);
-        throw error;
-    } finally {
-        if (browser) {
-            await browser.close();
-            log('Navigateur fermé');
-        }
-    }
-}
-
-// Exécution du script
-main().catch(error => {
-    log(`Erreur fatale: ${error.message}`);
-    process.exit(1);
-});
+// Run the script immediately
+loginAndClickClass();
