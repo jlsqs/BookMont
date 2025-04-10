@@ -140,10 +140,9 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
         { timeout: 10000 }
     );
     
-    // Calculer l'heure exacte d'ouverture (5 jours avant l'heure du cours)
+    // Calculer l'heure exacte d'ouverture
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
-    targetTime.setDate(targetTime.getDate() - 5); // Soustraire 5 jours
     targetTime.setHours(hours, minutes, 0, 0);
     
     // Vérifier si on est déjà en retard
