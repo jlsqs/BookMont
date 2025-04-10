@@ -76,7 +76,7 @@ async function main() {
         // Définition de l'heure du cours selon le jour
         const classTimes = {
             1: "07h30", // Lundi
-            2: "08h40", // Mardi
+            2: "16h15", // Mardi
             3: "07h30", // Mercredi
             4: "08h35", // Jeudi
             5: "08h35", // Vendredi
