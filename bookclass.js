@@ -159,7 +159,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     console.log(`Current time: ${targetTime.toISOString()}`);
     console.log(`Timezone offset: ${timezoneOffset} hours`);
     console.log(`Target time (local): ${hours}:${minutes}:04`);
-    targetTime.setHours(hours + timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
+    targetTime.setHours(hours - timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
     console.log(`Target time (UTC): ${targetTime.toISOString()}`);
     
     // Vérifier si on est déjà en retard
