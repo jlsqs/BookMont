@@ -156,7 +156,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
     const timezoneOffset = targetTime.getTimezoneOffset() / 60; // Convertir en heures
-    targetTime.setHours(hours - timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
+    targetTime.setHours(hours + timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
     
     // Vérifier si on est déjà en retard
     const now = new Date();
