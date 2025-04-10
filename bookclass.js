@@ -1,10 +1,19 @@
+require('dotenv').config();
 const puppeteer = require('puppeteer');
 
 let consoleLogs = []; // Array to store console logs
+let browser = null;
 
 function log(message) {
-    consoleLogs.push(message);
-    console.log(message);
+    const timestamp = new Date().toISOString();
+    consoleLogs.push(`[${timestamp}] ${message}`);
+    console.log(`[${timestamp}] ${message}`);
+}
+
+// Vérifier les variables d'environnement
+if (!process.env.MONTGOLFIERE_EMAIL || !process.env.MONTGOLFIERE_PASSWORD) {
+    log('❌ Erreur: Les variables d\'environnement MONTGOLFIERE_EMAIL et MONTGOLFIERE_PASSWORD doivent être définies');
+    process.exit(1);
 }
 
 async function main() {
@@ -30,6 +39,11 @@ async function main() {
             timeout: 30000
         });
 
+        // Vérifier que les champs de connexion existent
+        await page.waitForSelector('#connexion_email', { timeout: 30000 });
+        await page.waitForSelector('#connexion_password', { timeout: 30000 });
+
+        // Saisir les identifiants
         await page.type('#connexion_email', process.env.MONTGOLFIERE_EMAIL);
         await page.type('#connexion_password', process.env.MONTGOLFIERE_PASSWORD);
         await page.click('#btn-connexion');
