@@ -143,7 +143,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     // Calculer l'heure exacte d'ouverture
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
-    targetTime.setHours(hours, minutes, 0, 0);
+    targetTime.setHours(hours, minutes, 4, 0); // Ajouter 4 secondes
     
     // Vérifier si on est déjà en retard
     const now = new Date();
@@ -158,9 +158,6 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
         console.log(`Waiting ${Math.floor(timeToWait / 1000)} seconds until booking time...`);
         await new Promise(resolve => setTimeout(resolve, timeToWait));
     }
-    
-    // Attendre 4 secondes après l'heure d'ouverture pour s'assurer que le créneau est bien ouvert
-    await new Promise(resolve => setTimeout(resolve, 4000));
     
     // Tenter de cliquer sur le bouton avec retry en cas d'échec
     for (let attempt = 1; attempt <= 3; attempt++) {
