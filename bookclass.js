@@ -152,10 +152,11 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
         { timeout: 10000 }
     );
     
-    // Calculer l'heure exacte d'ouverture
+    // Calculer l'heure exacte d'ouverture en tenant compte du décalage horaire
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
-    targetTime.setHours(hours, minutes, 4, 0); // Ajouter 4 secondes
+    const timezoneOffset = targetTime.getTimezoneOffset() / 60; // Convertir en heures
+    targetTime.setHours(hours - timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
     
     // Vérifier si on est déjà en retard
     const now = new Date();
