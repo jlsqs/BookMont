@@ -156,7 +156,11 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
     const timezoneOffset = targetTime.getTimezoneOffset() / 60; // Convertir en heures
+    console.log(`Current time: ${targetTime.toISOString()}`);
+    console.log(`Timezone offset: ${timezoneOffset} hours`);
+    console.log(`Target time (local): ${hours}:${minutes}:04`);
     targetTime.setHours(hours + timezoneOffset, minutes, 4, 0); // Ajouter 4 secondes
+    console.log(`Target time (UTC): ${targetTime.toISOString()}`);
     
     // Vérifier si on est déjà en retard
     const now = new Date();
