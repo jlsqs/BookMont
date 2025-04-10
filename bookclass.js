@@ -155,7 +155,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     // Calculer l'heure exacte d'ouverture en tenant compte du décalage horaire
     const [hours, minutes] = targetClassTime.split('h').map(Number);
     const targetTime = new Date();
-    const timezoneOffset = targetTime.getTimezoneOffset() / 60; // Convertir en heures
+    const timezoneOffset = 2; // UTC+2 pour l'heure d'été en France
     console.log(`Current time: ${targetTime.toISOString()}`);
     console.log(`Timezone offset: ${timezoneOffset} hours`);
     console.log(`Target time (local): ${hours}:${minutes}:04`);
