@@ -76,7 +76,7 @@ async function main() {
         // Définition de l'heure du cours selon le jour
         const classTimes = {
             1: "07h30", // Lundi
-            2: "16h15", // Mardi
+            2: "08h40", // Mardi
             3: "07h30", // Mercredi
             4: "08h35", // Jeudi
             5: "08h35", // Vendredi
@@ -163,7 +163,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     console.log(`Target time (UTC): ${targetTime.toISOString()}`);
     
     // Vérifier si on est déjà en retard
-    const now = new Date();
+    ct now = new Date();
     const timeToWait = targetTime - now;
     
     if (timeToWait < -300000) { // Si on est plus de 5 minutes en retard
