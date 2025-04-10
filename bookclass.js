@@ -163,7 +163,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
     console.log(`Target time (UTC): ${targetTime.toISOString()}`);
     
     // Vérifier si on est déjà en retard
-    ct now = new Date();
+    const now = new Date();
     const timeToWait = targetTime - now;
     
     if (timeToWait < -300000) { // Si on est plus de 5 minutes en retard
