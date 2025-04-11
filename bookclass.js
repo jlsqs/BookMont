@@ -34,22 +34,40 @@ async function main() {
 
         // Login
         log('Tentative de connexion...');
-        await page.goto('https://lamontgolfiereclub.com/dashboard/', {
-            waitUntil: 'networkidle2',
-            timeout: 30000
-        });
+        let loginSuccess = false;
+        let retryCount = 0;
+        const maxRetries = 3;
 
-        // Vérifier que les champs de connexion existent
-        await page.waitForSelector('#connexion_email', { timeout: 30000 });
-        await page.waitForSelector('#connexion_password', { timeout: 30000 });
+        while (!loginSuccess && retryCount < maxRetries) {
+            try {
+                await page.goto('https://lamontgolfiereclub.com/dashboard/', {
+                    waitUntil: ['networkidle0', 'domcontentloaded'],
+                    timeout: 30000 // Back to 30 seconds
+                });
 
-        // Saisir les identifiants
-        await page.type('#connexion_email', process.env.MONTGOLFIERE_EMAIL);
-        await page.type('#connexion_password', process.env.MONTGOLFIERE_PASSWORD);
-        await page.click('#btn-connexion');
-        
-        await page.waitForSelector('#account__logout', { timeout: 30000 });
-        log('Connexion réussie!');
+                // Vérifier que les champs de connexion existent
+                await page.waitForSelector('#connexion_email', { timeout: 30000 });
+                await page.waitForSelector('#connexion_password', { timeout: 30000 });
+
+                // Saisir les identifiants
+                await page.type('#connexion_email', process.env.MONTGOLFIERE_EMAIL);
+                await page.type('#connexion_password', process.env.MONTGOLFIERE_PASSWORD);
+                await page.click('#btn-connexion');
+                
+                await page.waitForSelector('#account__logout', { timeout: 30000 });
+                log('Connexion réussie!');
+                loginSuccess = true;
+            } catch (error) {
+                retryCount++;
+                log(`Tentative ${retryCount}/${maxRetries} échouée: ${error.message}`);
+                if (retryCount < maxRetries) {
+                    log('Nouvelle tentative dans 10 secondes...');
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+                } else {
+                    throw new Error(`Échec de la connexion après ${maxRetries} tentatives`);
+                }
+            }
+        }
 
         // Navigation vers le planning
         log('Navigation vers le planning...');
