@@ -1,4 +1,4 @@
-require('dotenv').config();
+h4require('dotenv').config();
 const puppeteer = require('puppeteer');
 
 let consoleLogs = []; // Array to store console logs
@@ -95,7 +95,7 @@ async function main() {
         const classTimes = {
             1: "07h30", // Lundi
             2: "08h40", // Mardi
-            3: "07h30", // Mercredi
+            3: "19h45", // Mercredi
             4: "08h35", // Jeudi
             5: "08h35", // Vendredi
         };
