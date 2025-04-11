@@ -1,4 +1,4 @@
-h4require('dotenv').config();
+require('dotenv').config();
 const puppeteer = require('puppeteer');
 
 let consoleLogs = []; // Array to store console logs
