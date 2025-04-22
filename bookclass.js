@@ -95,7 +95,7 @@ async function main() {
         const classTimes = {
             1: "07h30", // Lundi
             2: "08h40", // Mardi
-            3: "19h45", // Mercredi
+            3: "07h30", // Mercredi
             4: "08h35", // Jeudi
             5: "08h35", // Vendredi
         };
