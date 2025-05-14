@@ -200,7 +200,7 @@ async function waitForBookingButton(page, uniqueClassId, targetClassTime) {
             await page.click(`button[onclick="go_subscribe(${uniqueClassId});"]`);
             
             // Attendre un court instant pour voir si une erreur apparaît
-            await page.waitForTimeout(1000);
+            await new Promise(resolve => setTimeout(resolve, 1000));
             
             // Vérifier si une erreur est apparue
             const errorMessage = await page.evaluate(() => {
